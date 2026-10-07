@@ -1,0 +1,92 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+
+# Load the cleaned dataset
+
+df=pd.read_csv(r"c:\Users\Mark\Desktop\DATA CLEANING .csv", encoding="latin1")
+
+# Create a folder for charts
+os.makedirs("charts", exist_ok=True)
+
+# Display first five rows
+print("First five rows:")
+print(df.head())
+
+# Dataset size
+print("\nDataset shape:")
+print(df.shape)
+
+# Column names and data types
+print("\nDataset information:")
+df.info()
+
+# Missing values
+print("\nMissing values:")
+print(df.isnull().sum())
+
+# Duplicate records
+print("\nDuplicate rows:", df.duplicated().sum())
+numeric_df = df.select_dtypes(include="number")
+
+print("\nNumerical summary:")
+print(numeric_df.describe())
+
+print("\nMedian:")
+print(numeric_df.median())
+
+print("\nStandard deviation:")
+print(numeric_df.std())
+
+for column in numeric_df.columns:
+    plt.figure(figsize=(7, 4))
+    sns.histplot(df[column].dropna(), kde=True)
+    plt.title(f"Distribution of {column}")
+    plt.xlabel(column)
+    plt.ylabel("Frequency")
+    plt.tight_layout()
+    plt.savefig(f"charts/{column}_histogram.png")
+    plt.show()
+    plt.close()
+for column in numeric_df.columns:
+    plt.figure(figsize=(7, 4))
+    sns.boxplot(x=df[column])
+    plt.title(f"Boxplot of {column}")
+    plt.tight_layout()
+    plt.savefig(f"charts/{column}_boxplot.png")
+    plt.show()
+    plt.close()
+
+for column in categorical_df.columns:
+    counts = df[column].value_counts().head(10)
+
+    plt.figure(figsize=(8, 4))
+    sns.barplot(x=counts.index.astype(str), y=counts.values)
+    plt.title(f"Top categories in {column}")
+    plt.xlabel(column)
+    plt.ylabel("Count")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    plt.savefig(f"charts/{column}_bar_chart.png")
+    plt.show()
+    plt.close()
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+
+monthly_sales = (
+    df.dropna(subset=["Date"])
+      .set_index("Date")
+      .resample("ME")["Sales"]
+      .sum()
+)
+
+monthly_sales.plot(figsize=(10, 5), marker="o")
+plt.title("Monthly Sales Trend")
+plt.xlabel("Month")
+plt.ylabel("Total Sales")
+plt.tight_layout()
+plt.savefig("charts/monthly_sales_trend.png")
+plt.show()
+
+
+    
